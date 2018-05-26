@@ -188,9 +188,16 @@ void main(int32_t argc, char** argv)
     MainThread* main_thread = new MainThread(argc, argv);
     main_thread->start();
 
+#ifdef _CONSOLE
+    exlib::OSThread th;
+
+    th.bindCurrent();
+    th.suspend();
+#else /* _CONSOLE */
     run_gui();
-}
-}
+#endif /* _CONSOLE */
+} /* fibjs::main */
+} /* namespace fibjs */
 
 #ifdef _WIN32
 
@@ -221,8 +228,78 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     return 0;
 }
 
-#else
+#endif /* _WIN32 */
 
+#ifdef __APPLE__
+#ifdef _CONSOLE
+int32_t main(int32_t argc, char* argv[])
+{
+    fibjs::main(argc, argv);
+    return 0;
+}
+#else /* _CONSOLE */
+#import <Cocoa/Cocoa.h>
+@interface FbDelegate : NSObject {
+}
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)theApplication;
+- (BOOL)windowShouldClose:(id)window;
+@end
+
+@implementation FbDelegate
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)theApplication
+{
+    return YES;
+}
+// - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
+
+- (BOOL)windowShouldClose:(id)window
+{
+    NSAlert* alert = [[NSAlert alloc] init];
+    [alert setAlertStyle:NSInformationalAlertStyle];
+    [alert setMessageText:@"Are you sure you want to quit?"];
+    [alert addButtonWithTitle:@"Yes"];
+    [alert addButtonWithTitle:@"No"];
+    NSInteger result = [alert runModal];
+    if (result == NSAlertFirstButtonReturn) {
+        [alert release];
+        return YES;
+    }
+    [alert release];
+    return NO;
+}
+@end
+int32_t main(int32_t argc, char* argv[])
+{
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    [NSApplication sharedApplication];
+
+    // // //Create the main window
+    // NSRect rc = NSMakeRect(0, 0, 800, 600);
+    // NSUInteger uiStyle = NSTitledWindowMask | NSResizableWindowMask | NSClosableWindowMask;
+    // NSBackingStoreType backingStoreStyle = NSBackingStoreBuffered;
+    // NSWindow* win = [[NSWindow alloc] initWithContentRect:rc styleMask:uiStyle backing:backingStoreStyle defer:NO];
+    // [win setTitle:@"HelloWin Test"];
+    // [win center]; //Center main Window
+    // [win makeKeyAndOrderFront:win];
+    // [win makeMainWindow];
+
+    // //Set delegate to application object
+    FbDelegate* fbDelegate = [[FbDelegate alloc] init];
+    // // //Use the same delegate object to window object
+    // // [win setDelegate:fbDelegate];
+    [NSApp setDelegate:fbDelegate];
+    // // //Start the event loop by calling NSApp run
+    // [NSApp run];
+    // Release the object
+    [fbDelegate release];
+    [pool drain];
+
+    fibjs::main(argc, argv);
+
+    return 0;
+}
+#endif /* _CONSOLE */
+#else /* __APPLE__ */
 int32_t main(int32_t argc, char* argv[])
 {
     fibjs::main(argc, argv);

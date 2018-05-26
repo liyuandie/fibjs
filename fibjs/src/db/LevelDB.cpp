@@ -118,8 +118,8 @@ result_t LevelDB::_mget(std::vector<exlib::string>* keys,
     obj_ptr<NArray> list = new NArray();
     int32_t i;
 
-    Variant nil;
-    nil.setNull();
+    Variant _nil;
+    _nil.setNull();
 
     for (i = 0; i < (int32_t)ks.size(); i++) {
         std::string value;
@@ -128,7 +128,7 @@ result_t LevelDB::_mget(std::vector<exlib::string>* keys,
             leveldb::Slice(ks[i].c_str(), ks[i].length()),
             &value);
         if (s.IsNotFound())
-            list->append(nil);
+            list->append(_nil);
         else if (!s.ok())
             return CHECK_ERROR(Runtime::setError(s.ToString()));
         else

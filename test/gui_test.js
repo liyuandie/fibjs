@@ -7,6 +7,7 @@ var os = require("os");
 var path = require("path");
 
 var win = process.platform == 'win32';
+var mac = process.platform == 'darwin';
 
 var html =
     `<html>
@@ -26,6 +27,24 @@ var html =
     }
 </script>
 </html>`;
+
+if (mac) {
+    console.log('"mac" string in javascript');
+    describe("gui", () => {
+        var gui = require("gui");
+        gui.open('123');
+        console.log('\nlog in javascript');
+
+        // var coroutine = require('coroutine');
+
+        // coroutine.start(() => {
+        //     gui.open('123');
+        //     while (true) {
+        //         coroutine.sleep(1000);
+        //     }
+        // })
+    })
+}
 
 if (win) {
     var http = require("http");
