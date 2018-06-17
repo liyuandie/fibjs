@@ -337,9 +337,9 @@ var semvar = (function () {
         process.env &&
         process.env.NODE_DEBUG &&
         /\bsemver\b/i.test(process.env.NODE_DEBUG))
-        debug = function () {};
+        debug = function () { };
     else
-        debug = function () {};
+        debug = function () { };
     exports.SEMVER_SPEC_VERSION = '2.0.0';
     var MAX_LENGTH = 256;
     var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
@@ -714,9 +714,9 @@ var semvar = (function () {
         }
         return (anum && !bnum) ? -1 :
             (bnum && !anum) ? 1 :
-            a < b ? -1 :
-            a > b ? 1 :
-            0;
+                a < b ? -1 :
+                    a > b ? 1 :
+                        0;
     }
     exports.rcompareIdentifiers = rcompareIdentifiers;
 
@@ -1046,7 +1046,7 @@ var semvar = (function () {
                     ' <' + M + '.' + (+m + 1) + '.0';
             } else
                 ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + (+m + 1) + '.0';
+                    ' <' + M + '.' + (+m + 1) + '.0';
             debug('tilde return', ret);
             return ret;
         });
@@ -1080,25 +1080,25 @@ var semvar = (function () {
                 if (M === '0') {
                     if (m === '0')
                         ret = '>=' + M + '.' + m + '.' + p + pr +
-                        ' <' + M + '.' + m + '.' + (+p + 1);
+                            ' <' + M + '.' + m + '.' + (+p + 1);
                     else
                         ret = '>=' + M + '.' + m + '.' + p + pr +
-                        ' <' + M + '.' + (+m + 1) + '.0';
+                            ' <' + M + '.' + (+m + 1) + '.0';
                 } else
                     ret = '>=' + M + '.' + m + '.' + p + pr +
-                    ' <' + (+M + 1) + '.0.0';
+                        ' <' + (+M + 1) + '.0.0';
             } else {
                 debug('no pr');
                 if (M === '0') {
                     if (m === '0')
                         ret = '>=' + M + '.' + m + '.' + p +
-                        ' <' + M + '.' + m + '.' + (+p + 1);
+                            ' <' + M + '.' + m + '.' + (+p + 1);
                     else
                         ret = '>=' + M + '.' + m + '.' + p +
-                        ' <' + M + '.' + (+m + 1) + '.0';
+                            ' <' + M + '.' + (+m + 1) + '.0';
                 } else
                     ret = '>=' + M + '.' + m + '.' + p +
-                    ' <' + (+M + 1) + '.0.0';
+                        ' <' + (+M + 1) + '.0.0';
             }
             debug('caret return', ret);
             return ret;
@@ -1377,6 +1377,9 @@ var http = require('http');
 var zlib = require('zlib');
 var hash = require('hash');
 
+var GITHUB_HTTPS_BASE = 'https://github.com/';
+var GITHUB_API_BASE = 'https://api.github.com/';
+
 function read_module(p, parent) {
     var modules = {};
     if (fs.exists(path.join(p, 'node_modules'))) {
@@ -1419,11 +1422,39 @@ function http_get(u) {
     process.exit(-1);
 }
 
+function is_github_protocol(pkg_path) {
+    return pkg_path.indexOf('github:') === 0
+}
+
+function parse_github_path(github_pkg_path) {
+    var [_, pkg_uri] = github_pkg_path.split('github:')
+
+    var [pkg_path, pkg_git_tag] = pkg_uri.split('#')
+
+    return {
+        path: pkg_path,
+        tag: pkg_git_tag,
+        ref: 'master'
+    }
+}
+
 function get_version(m, v, parent) {
     var info = infos[m];
 
     if (info === undefined) {
-        var url = snap.registry + m.replace(/\//g, '%2F');
+        var http_find_path = m.replace(/\//g, '%2F');
+        var url = snap.registry + http_find_path;
+        if (is_github_protocol(http_find_path)) {
+            http_find_path = m;
+            var parsed_info = parse_github_path(http_find_path);
+            var github_info = `${GITHUB_API_BASE}/repos/${parsed_info.path}`;
+            if (!github_info) {
+                throw `error occured when trying to fetch info of ${m}`
+            }
+            var ref = parsed_info.tag || parsed_info.ref;
+            var tarball_url = `${GITHUB_API_BASE}${parsed_info.path}/tarball/${ref}`;
+            url = tarball_url;
+        }
         console.log('fetch metadata:', m, "=>", url);
         infos[m] = info = http_get(url).json();
     }
@@ -1545,7 +1576,7 @@ function mkdir(p) {
         mkdir(path.dirname(p));
         try {
             fs.mkdir(p);
-        } catch (e) {}
+        } catch (e) { }
     }
 }
 
@@ -1554,7 +1585,7 @@ function download_module() {
         m = paths[m];
         var r = http_get(m.dist.tarball);
         if (r.statusCode !== 200) {
-            console.error('doenload error::', m.dist.tarball);
+            console.error('download error::', m.dist.tarball);
             process.exit();
         }
 
