@@ -35,6 +35,7 @@ public:
 
 static std::list<obj_ptr<cache_node>> s_cache;
 static exlib::spinlock s_cachelock;
+static v8::Local<v8::Map> statWatchers;
 
 result_t fs_base::setZipFS(exlib::string fname, Buffer_base* data)
 {
@@ -445,6 +446,26 @@ result_t fs_base::appendFile(exlib::string fname, Buffer_base* data, AsyncEvent*
 
     hr = f->cc_write(data);
     f->cc_close();
+
+    return hr;
+}
+
+result_t fs_base::watch(exlib::string fname, v8::Local<v8::Object> options)
+{
+    return fs_base::watch(fname, options, v8::Local<v8::Function>());
+}
+
+result_t fs_base::watch(exlib::string fname, v8::Local<v8::Function> listener)
+{
+    Isolate* isolate = Isolate::current();
+
+    v8::Local<v8::Object> options = v8::Object::New(isolate->m_isolate);
+    return fs_base::watch(fname, options, listener);
+}
+
+result_t fs_base::watch(exlib::string fname, v8::Local<v8::Object> options, v8::Local<v8::Function> listener)
+{
+    result_t hr;
 
     return hr;
 }

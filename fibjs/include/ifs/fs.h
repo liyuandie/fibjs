@@ -68,6 +68,9 @@ public:
     static result_t writeTextFile(exlib::string fname, exlib::string txt, AsyncEvent* ac);
     static result_t writeFile(exlib::string fname, Buffer_base* data, AsyncEvent* ac);
     static result_t appendFile(exlib::string fname, Buffer_base* data, AsyncEvent* ac);
+    static result_t watch(exlib::string fname, v8::Local<v8::Object> options);
+    static result_t watch(exlib::string fname, v8::Local<v8::Function> listener);
+    static result_t watch(exlib::string fname, v8::Local<v8::Object> options, v8::Local<v8::Function> listener);
     static result_t setZipFS(exlib::string fname, Buffer_base* data);
     static result_t clearZipFS(exlib::string fname);
 
@@ -118,6 +121,7 @@ public:
     static void s_writeTextFile(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void s_writeFile(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void s_appendFile(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void s_watch(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void s_setZipFS(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void s_clearZipFS(const v8::FunctionCallbackInfo<v8::Value>& args);
 
@@ -234,6 +238,7 @@ inline ClassInfo& fs_base::class_info()
         { "writeFileSync", s_writeFile, true },
         { "appendFile", s_appendFile, true },
         { "appendFileSync", s_appendFile, true },
+        { "watch", s_watch, true },
         { "setZipFS", s_setZipFS, true },
         { "clearZipFS", s_clearZipFS, true }
     };
@@ -930,6 +935,36 @@ inline void fs_base::s_appendFile(const v8::FunctionCallbackInfo<v8::Value>& arg
         hr = CALL_RETURN_NULL;
     } else
         hr = ac_appendFile(v0, v1);
+
+    METHOD_VOID();
+}
+
+inline void fs_base::s_watch(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    METHOD_NAME("fs.watch");
+    METHOD_ENTER();
+
+    METHOD_OVER(2, 2);
+
+    ARG(exlib::string, 0);
+    ARG(v8::Local<v8::Object>, 1);
+
+    hr = watch(v0, v1);
+
+    METHOD_OVER(2, 2);
+
+    ARG(exlib::string, 0);
+    ARG(v8::Local<v8::Function>, 1);
+
+    hr = watch(v0, v1);
+
+    METHOD_OVER(3, 3);
+
+    ARG(exlib::string, 0);
+    ARG(v8::Local<v8::Object>, 1);
+    ARG(v8::Local<v8::Function>, 2);
+
+    hr = watch(v0, v1, v2);
 
     METHOD_VOID();
 }

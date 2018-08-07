@@ -1,0 +1,11 @@
+
+/*! @brief 文件变化的监听对象
+
+ */
+interface FSWatcher : EventEmitter
+{
+    /*! @brief  `fs.watch()` 执行成功后, 将会返回一个 fs.FSWatcher 对象.
+     */
+    FSWatcher();
+
+};
